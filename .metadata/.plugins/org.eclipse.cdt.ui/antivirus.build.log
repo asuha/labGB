@@ -1,0 +1,15 @@
+23:42:55 **** Incremental Build of configuration Debug for project antivirus ****
+make all 
+Building file: ../src/antivirus.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/antivirus.d" -MT"src/antivirus.d" -o "src/antivirus.o" "../src/antivirus.c"
+Finished building: ../src/antivirus.c
+ 
+Building target: antivirus
+Invoking: GCC C Linker
+gcc  -o "antivirus"  ./src/antivirus.o   
+Finished building target: antivirus
+ 
+
+23:42:55 Build Finished (took 214ms)
+
