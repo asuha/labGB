@@ -1,66 +1,93 @@
-/*
- ============================================================================
- Name        : antivirus.c
- Author      : Julio Renner
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
+//
+//  main.c
+//  antivirus
+//
+//  Created by Júlio Renner on 03/06/17.
+//  Copyright © 2017 RENNERJ. All rights reserved.
+//
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
+#include <stdbool.h>
 
-char* virusSignature;
-const char* FILE_NAME="./teste.txt";
-const char* GZIP_FILE_NAME="./teste.txt.gz";
+#define _XOPEN_SOURCE = 700;
 
-FILE* openFile(const char* sFilePath);
+char* FILE_NAME = "teste.txt";
+
+int openFile(char* fileName);
+bool isZippedFile(int fileDescriptor);
 
 int main(int argc, const char * argv[]) {
-    printf("abriu\n");
-	FILE* fp = openFile(GZIP_FILE_NAME);
-	char buff[255];
+    int fileDescriptor = openFile(FILE_NAME);
 
-	//fread(buff,2,1,fp);
+    unsigned int byte[2];
 
-	//printf("%d %d", buff[0], buff[1]);
-	//fgetc(fp);
+    int count = read(fileDescriptor, &byte, 2);
 
-	char byte;
-	while( (byte=fgetc(fp)) != EOF){
-		printf("%d\t", byte);
-	}
-
-	//int array[2] = {3,5};
-	//int idx = 1;
-
-	//printf("%d\n", idx[array]);
-}
-
-FILE* openFile(const char* sFilePath){
-	printf("openFIle\n");
-
-
-    FILE* fp = (FILE*)malloc(sizeof(FILE));
-    fp = fopen(sFilePath, "r");
-
-    if (!fp) {
-    	perror("Não encontrou o arquivo");
-    	exit(1);
+    if (count <= 0) {
+        printf("read failed\n");
+        exit(0);
     }
 
-    return fp;
+    if (isZippedFile(byte[0])){
+        printf("zipped file");
+    }
+    //printf("%X\n", byte[0]);
 
-/*    char teste[150] = "";
+    close(fileDescriptor);
 
-    int res = read(iFile, teste, 150);
+    fileDescriptor = openFile(FILE_NAME);
+    do{
+        char buf[15];
+        count = read(fileDescriptor, buf, 14);
+        if (count > 0 ) {
+            //Check for entered string.
+            printf("%s\n", buf);
+        }
+    
+    } while( count > 0);
 
-    printf("%d\n", res);
-    printf("%d \n", teste);*/
+    return 0;
+}
+
+int openFile(char* fileName){
+
+    int fileDescriptor = open(fileName, O_CLOEXEC | O_RDONLY);
+
+    if (!(fileDescriptor > 0)){
+        perror("Error reading file");
+        exit(0);
+    }
+
+    /*unsigned int byte[2];
+
+    int teste = read(fileDescriptor, &byte, 1);
+    int v1 = byte[0];
+    teste = read(fileDescriptor, &byte, 1);
+    int v2 = byte[0];
+    printf("%i\n", teste);
+
+    if ( byte[0] == "0x8b1f" ) {
+        printf("worked\n");
+    }
+
+    unsigned int teste1 = byte[0];
+
+    printf("%x\n", byte[0]);
+    //printf("%s\t", byte[1]);
+*/
+    return fileDescriptor;
+}
+
+bool isZippedFile(int value) {
+
+    if (( value == 35615 ))
+        return true;
+
+    return false;
+
 }
