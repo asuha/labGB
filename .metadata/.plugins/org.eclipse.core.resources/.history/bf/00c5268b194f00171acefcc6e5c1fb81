@@ -1,0 +1,53 @@
+/*
+ ============================================================================
+ Name        : TGB.c
+ Author      : 
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <string.h>
+
+bool isZippedFile(int value);
+
+const char* ARQUIVO_FIXO = "teste.txt";
+
+int main(int argc, const char * argv[]) {
+	char buffer[strlen(argv[1])];
+
+	int fileDescriptor = open(ARQUIVO_FIXO, O_CLOEXEC | O_RDONLY);
+
+	if (fileDescriptor < 0){
+		perror("Erro no open");
+		return EXIT_FAILURE;
+	}
+
+	int res = read(fileDescriptor, buffer, strlen(buffer));
+	if(res < 0){
+		perror("Erro no read");
+		return EXIT_FAILURE;
+	}
+	else if (res > 0)
+
+
+
+
+
+	return EXIT_SUCCESS;
+}
+
+bool isZippedFile(int value) {
+    if (( value == 35615 ))
+        return true;
+
+    return false;
+}
+

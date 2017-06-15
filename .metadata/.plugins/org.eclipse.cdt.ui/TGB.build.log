@@ -10,3 +10,6 @@ Invoking: GCC C Linker
 gcc  -o "TGB"  ./src/TGB.o   
 Finished building target: TGB
  
+
+14:30:29 Build Finished (took 2s.145ms)
+

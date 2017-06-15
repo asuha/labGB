@@ -13,17 +13,25 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include <string.h>
 
-#define _XOPEN_SOURCE = 700;
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
 
 char* FILE_NAME = "teste.txt.gz";
+
+const int SIZE = 10;
+char* assinatura;
 
 int openFile(char* fileName);
 bool isZippedFile(int fileDescriptor);
 int unzipFile(char* fileName);
 void executeUnzip(char* fileName);
+int processaArquivo(char* buffer, int verifica);
 
 int main(int argc, const char * argv[]) {
+	assinatura = argv[1];
+
     int fileDescriptorToCheckType = openFile(FILE_NAME);
 
     unsigned int byte[2];
@@ -38,25 +46,73 @@ int main(int argc, const char * argv[]) {
     close(fileDescriptorToCheckType);
 
     int iFileDescriptor;
+
     if (isZippedFile(byte[0])){
+
         printf("zipped file\n");
         iFileDescriptor = unzipFile(FILE_NAME);
+
     } else {
+
         iFileDescriptor = openFile(FILE_NAME);
+        int res = 0;
+        int offset = 0;
 
         do{
-            char buf[15];
-            count = read(iFileDescriptor, buf, 14);
-            if (count > 0 ) {
-                //Check for entered string.
-                printf("%s\n", buf);
-            }
+            char buffer[SIZE];
+            	for(int i = 0; i < SIZE; i++)
+            		buffer[i] = 0;
 
-        } while( count > 0);
+        	res = read(iFileDescriptor, buffer, SIZE);
+
+        	if(res < 0){
+        		perror("Erro no read");
+        		return EXIT_FAILURE;
+        	}
+
+        	if(res == 0)
+        		printf("EOF\n");
+
+        	else{
+        		int processa = processaArquivo(buffer, offset);
+
+        		if (processa == 0){
+        			printf("POSSUI!!\n");
+        			offset = 0;
+        		}
+        		else if (processa > 0)
+        			offset = processa;
+        		else
+        			offset = 0;
+        	}
+
+        } while(res > 0);
     }
 
     return 0;
 }
+
+int processaArquivo(char* buffer, int offset){
+	int verifica = -1;
+	int teste = 0;
+
+	for(int i = 0, j = 0; i < strlen(buffer); i++){
+		if(buffer[i] == assinatura[j + offset]){
+			teste++;
+			j++;
+		}
+	}
+
+	if((teste == strlen(assinatura)) | (teste == strlen(assinatura) - offset))
+		verifica = 0;
+	else if((teste == 0) | (teste > strlen(assinatura)))
+		verifica = -1;
+	else
+		verifica = teste;
+
+	return verifica;
+}
+
 
 int openFile(char* fileName){
 
@@ -96,6 +152,17 @@ bool isZippedFile(int value) {
 
 }
 
+
+void executeUnzip(char* fileName){
+    execlp("gzip",
+           "gzip",
+           "-d"  ,
+           "-c"  ,
+           fileName,
+           NULL );
+}
+
+
 int unzipFile(char* fileName){
     int pfd[2];
 
@@ -114,23 +181,42 @@ int unzipFile(char* fileName){
             executeUnzip(fileName);
         default:
             close(pfd[1]);
-            char buf[15];
-            int count = -1;
-            while (count != 0) {
-                count = read(pfd[0], buf, 14);
-                if (count > 0)
-                    printf("%s\n", buf); }
+
+            int res = 0;
+            int offset = 0;
+
+            do{
+                char buffer[SIZE];
+                	for(int i = 0; i < SIZE; i++)
+                		buffer[i] = 0;
+
+            	res = read(pfd[0], buffer, SIZE);
+
+            	if(res < 0){
+            		perror("Erro no read");
+            		return EXIT_FAILURE;
+            	}
+
+            	if(res == 0)
+            		printf("EOF\n");
+
+            	else{
+            		int processa = processaArquivo(buffer, offset);
+
+            		if (processa == 0){
+            			printf("POSSUI!!\n");
+            			offset = 0;
+            		}
+            		else if (processa > 0)
+            			offset = processa;
+            		else
+            			offset = 0;
+            	}
+
+            } while(res > 0);
+
             return 0;
             //read file and search for virus
     }
 
-}
-
-void executeUnzip(char* fileName){
-    execlp("gzip",
-           "gzip",
-           "-d"  ,
-           "-c"  ,
-           fileName,
-           NULL );
 }

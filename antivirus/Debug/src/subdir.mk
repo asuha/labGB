@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/antivirus.c 
+../src/antivirus.c \
+../src/antivirus1.c \
+../src/progresso1.c 
 
 OBJS += \
-./src/antivirus.o 
+./src/antivirus.o \
+./src/antivirus1.o \
+./src/progresso1.o 
 
 C_DEPS += \
-./src/antivirus.d 
+./src/antivirus.d \
+./src/antivirus1.d \
+./src/progresso1.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
