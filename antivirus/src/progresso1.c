@@ -60,14 +60,16 @@ int main(int argc, const char * argv[]) {
         } else {
 
             iFileDescriptor = openFile(sFile);
+        	numberOfFiles++;
 
-            lookForVirus(iFileDescriptor);
+            if(lookForVirus(iFileDescriptor))
+            	dprintf(1, "%s\n", sFile);
+
         }
-
     };
 
-    dprintf(2, numberOfFiles);
-    dprintf(2, numberOfFilesWithVirus);
+    dprintf(2, "Número de arquivos lidos: %d\n", numberOfFiles);
+    dprintf(2, "Número de arquivos com vírus: %d\n", numberOfFilesWithVirus);
 
     return 0;
 }
@@ -75,6 +77,7 @@ int main(int argc, const char * argv[]) {
 bool lookForVirus(int iFileDescriptor){
     int res = 0;
     int offset = 0;
+    bool virus = false;
 
     do{
         char buffer[SIZE];
@@ -93,15 +96,17 @@ bool lookForVirus(int iFileDescriptor){
         }
 
         else {
-        	numberOfFiles++;
 
             if (hasVirus(buffer, &offset, res) == true){
             	numberOfFilesWithVirus++;
+            	virus = true;
                 break;
             }
         }
 
     } while( res > 0);
+
+    return virus;
 }
 
 bool hasVirus(char* buffer, int* offset, int res){
