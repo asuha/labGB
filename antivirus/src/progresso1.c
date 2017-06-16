@@ -6,6 +6,9 @@
 //  Copyright © 2017 RENNERJ. All rights reserved.
 //
 
+#define _XOPEN_SOURCE 700
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,11 +18,11 @@
 #include <fcntl.h>
 #include <stdbool.h>
 
-#define _XOPEN_SOURCE = 700;
-#define _GNU_SOURCE
-
 const int SIZE = 11;
 char* signature;
+int numberOfFilesWithVirus = 0;
+int numberOfFiles = 0;
+char* filesWithVirus[];
 
 bool isZippedFile(int fileDescriptor);
 bool lookForVirus(int iFileDescriptor);
@@ -28,17 +31,14 @@ int unzipFile(char* fileName);
 bool hasVirus(char* buffer, int* verifica, int res);
 void executeUnzip(char* fileName);
 
-
 int main(int argc, const char * argv[]) {
 
     char sFile[30];
-    while( (scanf("%30[^\n]%*c",sFile) != EOF) ) {
+    while( (scanf("%30[^\n]%*c",sFile) != EOF) ){
+
         signature = argv[1];
-        printf("signature: %s\n", signature);
 
         int fileDescriptorToCheckType = openFile(sFile);
-
-        printf("read file: %s\n", sFile);
 
         unsigned int byte[2];
 
@@ -54,14 +54,20 @@ int main(int argc, const char * argv[]) {
         int iFileDescriptor;
 
         if (isZippedFile(byte[0])){
-            printf("zipped file\n");
+
             unzipFile(sFile);
+
         } else {
+
             iFileDescriptor = openFile(sFile);
 
             lookForVirus(iFileDescriptor);
         }
+
     };
+
+    dprintf(2, numberOfFiles);
+    dprintf(2, numberOfFilesWithVirus);
 
     return 0;
 }
@@ -82,12 +88,15 @@ bool lookForVirus(int iFileDescriptor){
             return EXIT_FAILURE;
         }
 
-        if(res == 0)
-            printf("EOF\n");
+        if(res == 0){
+        	//EOF
+        }
+
         else {
+        	numberOfFiles++;
 
             if (hasVirus(buffer, &offset, res) == true){
-                printf("POSSUI!!\n");
+            	numberOfFilesWithVirus++;
                 break;
             }
         }
@@ -98,7 +107,6 @@ bool lookForVirus(int iFileDescriptor){
 bool hasVirus(char* buffer, int* offset, int res){
     int j = 0;
     for(int i = 0; i < res; i++){
-        printf("buffer: %c   signature: %c  offset: %i\n", buffer[i], signature[j + *(offset)], *(offset) );
 
         if(buffer[i] == signature[j + *(offset)]){
             j++;
